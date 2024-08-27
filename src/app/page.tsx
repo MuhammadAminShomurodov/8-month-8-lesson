@@ -54,7 +54,7 @@ const ProfilePage = () => {
         `https://api.github.com/users/${username}`,
         {
           headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
+            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
           },
         }
       );
@@ -79,7 +79,7 @@ const ProfilePage = () => {
         `https://api.github.com/users/${username}`,
         {
           headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
+            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
           },
         }
       );
@@ -88,7 +88,7 @@ const ProfilePage = () => {
         `https://api.github.com/users/${username}/repos?per_page=100`,
         {
           headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
+            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
           },
         }
       );
@@ -129,7 +129,7 @@ const ProfilePage = () => {
         `https://api.github.com/users/${username}/events`,
         {
           headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
+            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
           },
         }
       );
