@@ -33,6 +33,12 @@ const ProfilePage = () => {
   const [searching, setSearching] = useState(false);
   const [showAllRepos, setShowAllRepos] = useState(false);
 
+  const config = {
+    headers: {
+      Authorization: `Bearer  ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
+    },
+  };
+
   useEffect(() => {
     const storedProfile = localStorage.getItem("profileInfo");
     if (storedProfile) {
@@ -52,11 +58,7 @@ const ProfilePage = () => {
     try {
       const response = await axios.get(
         `https://api.github.com/users/${username}`,
-        {
-          headers: {
-            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
-          },
-        }
+        config
       );
       setUsernames([username]);
     } catch (err: any) {
@@ -77,20 +79,12 @@ const ProfilePage = () => {
     try {
       const userResponse = await axios.get(
         `https://api.github.com/users/${username}`,
-        {
-          headers: {
-            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
-          },
-        }
+        config
       );
 
       const reposResponse = await axios.get(
         `https://api.github.com/users/${username}/repos?per_page=100`,
-        {
-          headers: {
-            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
-          },
-        }
+        config
       );
 
       const contributions = await getContributions(username);
@@ -127,11 +121,7 @@ const ProfilePage = () => {
     try {
       const eventsResponse = await axios.get(
         `https://api.github.com/users/${username}/events`,
-        {
-          headers: {
-            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
-          },
-        }
+        config
       );
 
       let totalCommits = 0;
