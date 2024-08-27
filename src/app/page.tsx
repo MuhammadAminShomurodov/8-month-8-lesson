@@ -33,12 +33,6 @@ const ProfilePage = () => {
   const [searching, setSearching] = useState(false);
   const [showAllRepos, setShowAllRepos] = useState(false);
 
-  const config = {
-    headers: {
-      Authorization: `Bearer  ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
-    },
-  };
-
   useEffect(() => {
     const storedProfile = localStorage.getItem("profileInfo");
     if (storedProfile) {
@@ -56,12 +50,10 @@ const ProfilePage = () => {
     setSearching(true);
 
     try {
-      const response = await axios.get(
-        `https://api.github.com/users/${username}`,
-        config
-      );
+      const response = await axios.get(`https://api.github.com/users/${username}`);
       setUsernames([username]);
     } catch (err: any) {
+      console.error("Error fetching user:", err.response?.data || err.message);
       setError(
         err.response?.status === 404
           ? "User not found"
@@ -77,17 +69,13 @@ const ProfilePage = () => {
     setProfileInfo(null);
 
     try {
-      const userResponse = await axios.get(
-        `https://api.github.com/users/${username}`,
-        config
-      );
+      const [userResponse, reposResponse, eventsResponse] = await Promise.all([
+        axios.get(`https://api.github.com/users/${username}`),
+        axios.get(`https://api.github.com/users/${username}/repos?per_page=100`),
+        axios.get(`https://api.github.com/users/${username}/events`),
+      ]);
 
-      const reposResponse = await axios.get(
-        `https://api.github.com/users/${username}/repos?per_page=100`,
-        config
-      );
-
-      const contributions = await getContributions(username);
+      const contributions = getContributions(eventsResponse.data);
 
       const profileData: ProfileInfo = {
         name: userResponse.data.name,
@@ -107,6 +95,7 @@ const ProfilePage = () => {
       localStorage.setItem("profileInfo", JSON.stringify(profileData));
       setProfileInfo(profileData);
     } catch (err: any) {
+      console.error("Error fetching profile:", err.response?.data || err.message);
       setError(
         err.response?.status === 404
           ? "User not found"
@@ -115,37 +104,25 @@ const ProfilePage = () => {
     }
   };
 
-  const getContributions = async (
-    username: string
-  ): Promise<ContributionInfo> => {
-    try {
-      const eventsResponse = await axios.get(
-        `https://api.github.com/users/${username}/events`,
-        config
-      );
-
-      let totalCommits = 0;
-      const recentActivity: ContributionInfo["recentActivity"] = [];
-      for (const event of eventsResponse.data) {
-        if (event.type === "PushEvent") {
-          totalCommits += event.payload.size;
-        } else if (
-          event.type === "IssuesEvent" ||
-          event.type === "PullRequestEvent"
-        ) {
-          recentActivity.push({
-            type: event.type,
-            repo: event.repo.name,
-            date: event.created_at,
-          });
-        }
+  const getContributions = (events: any[]): ContributionInfo => {
+    let totalCommits = 0;
+    const recentActivity: ContributionInfo["recentActivity"] = [];
+    for (const event of events) {
+      if (event.type === "PushEvent") {
+        totalCommits += event.payload.size;
+      } else if (
+        event.type === "IssuesEvent" ||
+        event.type === "PullRequestEvent"
+      ) {
+        recentActivity.push({
+          type: event.type,
+          repo: event.repo.name,
+          date: event.created_at,
+        });
       }
-
-      return { totalCommits, recentActivity };
-    } catch (err: any) {
-      console.error("Error fetching contributions:", err);
-      return { totalCommits: 0, recentActivity: [] };
     }
+
+    return { totalCommits, recentActivity };
   };
 
   const handleBackToSearch = () => {
